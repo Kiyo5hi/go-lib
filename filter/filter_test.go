@@ -51,7 +51,7 @@ func TestValue_ParseFloat(t *testing.T) {
 	assert.Equal(t, float64(119.911), v.Primitive())
 }
 
-func TestValue_Boolean(t *testing.T) {
+func TestValue_ParseBoolean(t *testing.T) {
 	parser, err := participle.Build[filter.Value]()
 	assert.NoError(t, err)
 
@@ -67,7 +67,7 @@ func TestValue_Boolean(t *testing.T) {
 	assert.ErrorContains(t, err, "unexpected token")
 }
 
-func TestValue_Null(t *testing.T) {
+func TestValue_ParseNull(t *testing.T) {
 	parser, err := participle.Build[filter.Value]()
 	assert.NoError(t, err)
 
