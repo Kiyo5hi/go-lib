@@ -2,8 +2,6 @@ package envs
 
 import (
 	"os"
-
-	"github.com/samber/lo"
 )
 
 type Runtime string
@@ -13,11 +11,14 @@ const (
 	RuntimeProduction Runtime = "prod"
 )
 
-func NewRuntime() *Runtime {
-	raw := os.Getenv("RUNTIME")
+func NewRuntime() Runtime {
+	raw, ok := os.LookupEnv("RUNTIME")
+	if !ok {
+		return RuntimeDebug
+	}
 	rt := Runtime(raw)
 	if rt == RuntimeProduction {
-		return lo.ToPtr(RuntimeProduction)
+		return RuntimeProduction
 	}
-	return lo.ToPtr(RuntimeDebug)
+	return RuntimeDebug
 }

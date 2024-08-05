@@ -1,11 +1,13 @@
 package envs
 
 type Enviroment struct {
-	Runtime *Runtime
+	AppName AppName
+	Runtime Runtime
 }
 
 func NewEnviroment() *Enviroment {
 	return &Enviroment{
+		AppName: NewAppName(),
 		Runtime: NewRuntime(),
 	}
 }
