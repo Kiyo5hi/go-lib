@@ -9,10 +9,11 @@ import (
 	slogmulti "github.com/samber/slog-multi"
 )
 
-func Logger() *slog.Logger {
+func Logger(opts ...option) *slog.Logger {
+	cfg := Options(opts...)
 	var handler slog.Handler
 	environ := envs.NewEnviroment()
-	if environ.Runtime == envs.RuntimeDebug {
+	if cfg.debug {
 		handler = slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
 			AddSource: true,
 			Level:     slog.LevelDebug,
