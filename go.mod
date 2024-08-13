@@ -1,13 +1,13 @@
 module github.com/kiyo5hi/go-lib
 
-go 1.22.5
+go 1.22
 
 require (
 	github.com/alecthomas/participle/v2 v2.1.1
 	github.com/samber/lo v1.46.0
 	github.com/samber/slog-multi v1.2.0
 	github.com/stretchr/testify v1.9.0
-	go.mongodb.org/mongo-driver v1.16.0
+	go.mongodb.org/mongo-driver v1.16.1
 	gorm.io/driver/mysql v1.5.7
 	gorm.io/gorm v1.25.11
 )
