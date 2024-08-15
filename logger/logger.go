@@ -1,6 +1,8 @@
 package logger
 
 import (
+	"context"
+	"encoding/json"
 	"fmt"
 	"log/slog"
 	"os"
@@ -32,4 +34,30 @@ func Logger(opts ...option) *slog.Logger {
 		)
 	}
 	return slog.New(handler)
+}
+
+func Debug(ctx context.Context, msg string, attrs ...slog.Attr) {
+	slog.LogAttrs(ctx, slog.LevelDebug, msg, attrs...)
+}
+
+func Info(ctx context.Context, msg string, attrs ...slog.Attr) {
+	slog.LogAttrs(ctx, slog.LevelInfo, msg, attrs...)
+}
+
+func Warn(ctx context.Context, msg string, attrs ...slog.Attr) {
+	slog.LogAttrs(ctx, slog.LevelWarn, msg, attrs...)
+}
+
+func Error(ctx context.Context, msg string, attrs ...slog.Attr) {
+	slog.LogAttrs(ctx, slog.LevelError, msg, attrs...)
+}
+
+func Fatal(ctx context.Context, msg string, attrs ...slog.Attr) {
+	slog.LogAttrs(ctx, 12, msg, attrs...)
+	os.Exit(1)
+}
+
+func Json[T any](key string, value T) slog.Attr {
+	b, _ := json.Marshal(value)
+	return slog.String(key, string(b))
 }
