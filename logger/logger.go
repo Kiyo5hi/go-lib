@@ -57,7 +57,11 @@ func Fatal(ctx context.Context, msg string, attrs ...slog.Attr) {
 	os.Exit(1)
 }
 
-func Json[T any](key string, value T) slog.Attr {
+func JsonKv[T any](key string, value T) slog.Attr {
 	b, _ := json.Marshal(value)
 	return slog.String(key, string(b))
+}
+
+func ErrorKv(err error) slog.Attr {
+	return slog.String("error", err.Error())
 }
