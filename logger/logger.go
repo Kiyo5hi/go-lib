@@ -2,7 +2,6 @@ package logger
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"log/slog"
 	"os"
@@ -55,13 +54,4 @@ func Error(ctx context.Context, msg string, attrs ...slog.Attr) {
 func Fatal(ctx context.Context, msg string, attrs ...slog.Attr) {
 	slog.LogAttrs(ctx, 12, msg, attrs...)
 	os.Exit(1)
-}
-
-func JsonKv[T any](key string, value T) slog.Attr {
-	b, _ := json.Marshal(value)
-	return slog.String(key, string(b))
-}
-
-func ErrorKv(err error) slog.Attr {
-	return slog.String("error", err.Error())
 }
