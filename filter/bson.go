@@ -6,7 +6,9 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-var comparisonOperatorToMongo = map[ComparisonOperator]func(string, *Value) bson.M{
+type BsonBuilder struct{}
+
+var comparisonOperatorToBson = map[ComparisonOperator]func(string, *Value) bson.M{
 	ComparisonOperatorEqual: func(field string, value *Value) bson.M {
 		return bson.M{
 			field: bson.M{
@@ -44,7 +46,7 @@ var comparisonOperatorToMongo = map[ComparisonOperator]func(string, *Value) bson
 	},
 }
 
-var logicalOperatorToMongo = map[LogicalOperator]func(...bson.M) bson.M{
+var logicalOperatorToBson = map[LogicalOperator]func(...bson.M) bson.M{
 	LogicalOperatorAnd: func(m ...bson.M) bson.M {
 		return bson.M{
 			"$and": m,
@@ -62,30 +64,26 @@ var logicalOperatorToMongo = map[LogicalOperator]func(...bson.M) bson.M{
 	},
 }
 
-func (fe *FilterExpression) ToMongoQuery() (bson.M, error) {
-	logicalOperator, ok := logicalOperatorToMongo[fe.Logic]
+func (*BsonBuilder) LogicalOperator(op LogicalOperator) (func(...bson.M) bson.M, error) {
+	query, ok := logicalOperatorToBson[op]
 	if !ok {
-		return nil, fmt.Errorf("unsupported logical operator: %s", string(fe.Logic))
+		return nil, fmt.Errorf("GORM does not support logical operator=%s", string(op))
 	}
+	return func(e ...bson.M) bson.M {
+		return query(e...)
+	}, nil
+}
 
-	subqueries := []bson.M{}
-	for _, ffe := range fe.Filters {
-		if ffe.FilterExpression != nil {
-			subquery, err := ffe.FilterExpression.ToMongoQuery()
-			if err != nil {
-				return nil, err
-			}
-			subqueries = append(subqueries, subquery)
-		} else {
-			f := ffe.Filter
-			mongoOp, ok := comparisonOperatorToMongo[f.Operator]
-			if !ok {
-				return nil, fmt.Errorf("unsupported comparison operator: %s", string(f.Operator))
-			}
-			subquery := mongoOp(f.Identifier, f.Value)
-			subqueries = append(subqueries, subquery)
-		}
+func (*BsonBuilder) ComparisonOperator(op ComparisonOperator) (func(string, *Value) bson.M, error) {
+	query, ok := comparisonOperatorToBson[op]
+	if !ok {
+		return nil, fmt.Errorf("GORM does not support comparison operator=%s", string(op))
 	}
+	return func(s string, v *Value) bson.M {
+		return query(s, v)
+	}, nil
+}
 
-	return logicalOperator(subqueries...), nil
+func (fe *FilterExpression) ToBson() (bson.M, error) {
+	return Build(&BsonBuilder{}, fe)
 }

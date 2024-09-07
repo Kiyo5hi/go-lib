@@ -6,6 +6,14 @@ import (
 	"gorm.io/gorm/clause"
 )
 
+type GormBuilder struct{}
+
+var logicalOperatorToGorm = map[LogicalOperator]func(...clause.Expression) clause.Expression{
+	LogicalOperatorAnd: clause.And,
+	LogicalOperatorOr:  clause.Or,
+	LogicalOperatorNot: clause.Not,
+}
+
 var comparisonOperatorToGorm = map[ComparisonOperator]func(string, *Value) clause.Expression{
 	ComparisonOperatorEqual: func(field string, value *Value) clause.Expression {
 		return &clause.Eq{Column: field, Value: value.Primitive()}
@@ -24,36 +32,26 @@ var comparisonOperatorToGorm = map[ComparisonOperator]func(string, *Value) claus
 	},
 }
 
-var logicalOperatorToGorm = map[LogicalOperator]func(...clause.Expression) clause.Expression{
-	LogicalOperatorAnd: clause.And,
-	LogicalOperatorOr:  clause.Or,
-	LogicalOperatorNot: clause.Not,
+func (*GormBuilder) LogicalOperator(op LogicalOperator) (func(...clause.Expression) clause.Expression, error) {
+	query, ok := logicalOperatorToGorm[op]
+	if !ok {
+		return nil, fmt.Errorf("GORM does not support logical operator=%s", string(op))
+	}
+	return func(e ...clause.Expression) clause.Expression {
+		return query(e...)
+	}, nil
+}
+
+func (*GormBuilder) ComparisonOperator(op ComparisonOperator) (func(string, *Value) clause.Expression, error) {
+	query, ok := comparisonOperatorToGorm[op]
+	if !ok {
+		return nil, fmt.Errorf("GORM does not support comparison operator=%s", string(op))
+	}
+	return func(s string, v *Value) clause.Expression {
+		return query(s, v)
+	}, nil
 }
 
 func (fe *FilterExpression) ToGorm() (clause.Expression, error) {
-	exprBuilder, ok := logicalOperatorToGorm[fe.Logic]
-	if !ok {
-		return nil, fmt.Errorf("unsupported logical operator: %s", string(fe.Logic))
-	}
-
-	exprs := []clause.Expression{}
-	for _, ffe := range fe.Filters {
-		if ffe.FilterExpression != nil {
-			expr, err := ffe.FilterExpression.ToGorm()
-			if err != nil {
-				return nil, err
-			}
-			exprs = append(exprs, expr)
-		} else {
-			f := ffe.Filter
-			gormOp, ok := comparisonOperatorToGorm[f.Operator]
-			if !ok {
-				return nil, fmt.Errorf("unsupported comparison operator: %s", string(f.Operator))
-			}
-			expr := gormOp(f.Identifier, f.Value)
-			exprs = append(exprs, expr)
-		}
-	}
-
-	return exprBuilder(exprs...), nil
+	return Build(&GormBuilder{}, fe)
 }

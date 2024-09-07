@@ -8,7 +8,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-func TestFilterExpression_ToMongoQuery(t *testing.T) {
+func TestFilterExpression_ToBson(t *testing.T) {
 	fe := filter.AndR(
 		filter.OrI(
 			filter.NotI(
@@ -19,7 +19,7 @@ func TestFilterExpression_ToMongoQuery(t *testing.T) {
 		filter.NewFilter("a", filter.ComparisonOperatorGreaterOrEqual, filter.Int(1)),
 	)
 
-	query, err := fe.ToMongoQuery()
+	query, err := fe.ToBson()
 	assert.NoError(t, err)
 	assert.Equal(t, bson.M{
 		"$and": []bson.M{{
