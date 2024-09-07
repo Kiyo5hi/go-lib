@@ -6,18 +6,60 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-var comparisonOperatorToMongo = map[ComparisonOperator]string{
-	ComparisonOperatorEqual:          "$eq",
-	ComparisonOperatorGreater:        "$gt",
-	ComparisonOperatorGreaterOrEqual: "$gte",
-	ComparisonOperatorLess:           "$lt",
-	ComparisonOperatorLessOrEqual:    "$lte",
+var comparisonOperatorToMongo = map[ComparisonOperator]func(string, *Value) bson.M{
+	ComparisonOperatorEqual: func(field string, value *Value) bson.M {
+		return bson.M{
+			field: bson.M{
+				"$eq": value.Primitive(),
+			},
+		}
+	},
+	ComparisonOperatorGreater: func(field string, value *Value) bson.M {
+		return bson.M{
+			field: bson.M{
+				"$gt": value.Primitive(),
+			},
+		}
+	},
+	ComparisonOperatorGreaterOrEqual: func(field string, value *Value) bson.M {
+		return bson.M{
+			field: bson.M{
+				"$gte": value.Primitive(),
+			},
+		}
+	},
+	ComparisonOperatorLess: func(field string, value *Value) bson.M {
+		return bson.M{
+			field: bson.M{
+				"$lt": value.Primitive(),
+			},
+		}
+	},
+	ComparisonOperatorLessOrEqual: func(field string, value *Value) bson.M {
+		return bson.M{
+			field: bson.M{
+				"$lte": value.Primitive(),
+			},
+		}
+	},
 }
 
-var logicalOperatorToMongo = map[LogicalOperator]string{
-	LogicalOperatorAnd: "$and",
-	LogicalOperatorOr:  "$or",
-	LogicalOperatorNot: "$not",
+var logicalOperatorToMongo = map[LogicalOperator]func(...bson.M) bson.M{
+	LogicalOperatorAnd: func(m ...bson.M) bson.M {
+		return bson.M{
+			"$and": m,
+		}
+	},
+	LogicalOperatorOr: func(m ...bson.M) bson.M {
+		return bson.M{
+			"$or": m,
+		}
+	},
+	LogicalOperatorNot: func(m ...bson.M) bson.M {
+		return bson.M{
+			"$not": m,
+		}
+	},
 }
 
 func (fe *FilterExpression) ToMongoQuery() (bson.M, error) {
@@ -40,16 +82,10 @@ func (fe *FilterExpression) ToMongoQuery() (bson.M, error) {
 			if !ok {
 				return nil, fmt.Errorf("unsupported comparison operator: %s", string(f.Operator))
 			}
-			subquery := bson.M{
-				f.Identifier: bson.M{
-					mongoOp: f.Value.Primitive(),
-				},
-			}
+			subquery := mongoOp(f.Identifier, f.Value)
 			subqueries = append(subqueries, subquery)
 		}
 	}
 
-	return bson.M{
-		logicalOperator: subqueries,
-	}, nil
+	return logicalOperator(subqueries...), nil
 }

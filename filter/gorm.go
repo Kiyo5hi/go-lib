@@ -6,12 +6,22 @@ import (
 	"gorm.io/gorm/clause"
 )
 
-var comparisonOperatorToGorm = map[ComparisonOperator]func(field, value any) clause.Expression{
-	ComparisonOperatorEqual:          func(field, value any) clause.Expression { return &clause.Eq{Column: field, Value: value} },
-	ComparisonOperatorGreater:        func(field, value any) clause.Expression { return &clause.Gt{Column: field, Value: value} },
-	ComparisonOperatorGreaterOrEqual: func(field, value any) clause.Expression { return &clause.Gte{Column: field, Value: value} },
-	ComparisonOperatorLess:           func(field, value any) clause.Expression { return &clause.Lt{Column: field, Value: value} },
-	ComparisonOperatorLessOrEqual:    func(field, value any) clause.Expression { return &clause.Lte{Column: field, Value: value} },
+var comparisonOperatorToGorm = map[ComparisonOperator]func(string, *Value) clause.Expression{
+	ComparisonOperatorEqual: func(field string, value *Value) clause.Expression {
+		return &clause.Eq{Column: field, Value: value.Primitive()}
+	},
+	ComparisonOperatorGreater: func(field string, value *Value) clause.Expression {
+		return &clause.Gt{Column: field, Value: value.Primitive()}
+	},
+	ComparisonOperatorGreaterOrEqual: func(field string, value *Value) clause.Expression {
+		return &clause.Gte{Column: field, Value: value.Primitive()}
+	},
+	ComparisonOperatorLess: func(field string, value *Value) clause.Expression {
+		return &clause.Lt{Column: field, Value: value.Primitive()}
+	},
+	ComparisonOperatorLessOrEqual: func(field string, value *Value) clause.Expression {
+		return &clause.Lte{Column: field, Value: value.Primitive()}
+	},
 }
 
 var logicalOperatorToGorm = map[LogicalOperator]func(...clause.Expression) clause.Expression{
@@ -40,7 +50,7 @@ func (fe *FilterExpression) ToGorm() (clause.Expression, error) {
 			if !ok {
 				return nil, fmt.Errorf("unsupported comparison operator: %s", string(f.Operator))
 			}
-			expr := gormOp(f.Identifier, f.Value.Primitive())
+			expr := gormOp(f.Identifier, f.Value)
 			exprs = append(exprs, expr)
 		}
 	}
