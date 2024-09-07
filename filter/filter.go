@@ -20,7 +20,7 @@ const (
 
 type Filter struct {
 	Identifier string             `parser:"@Ident"`
-	Operator   ComparisonOperator `parser:"@( '=' | '>''=' | '<''=' | '>' | '<' )"`
+	Operator   ComparisonOperator `parser:"@( '=' | '>''=' | '<''=' | '>' | '<' | '~' )"`
 	Value      *Value             `parser:"@@"`
 }
 
@@ -32,6 +32,7 @@ const (
 	ComparisonOperatorGreaterOrEqual ComparisonOperator = `>=`
 	ComparisonOperatorLess           ComparisonOperator = `<`
 	ComparisonOperatorLessOrEqual    ComparisonOperator = `<=`
+	ComparisonOperatorLike           ComparisonOperator = "~"
 )
 
 type Value struct {

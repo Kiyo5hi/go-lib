@@ -2,13 +2,14 @@ package filter
 
 import (
 	"fmt"
+	"strings"
 
 	"go.mongodb.org/mongo-driver/bson"
 )
 
 type BsonBuilder struct{}
 
-var comparisonOperatorToBson = map[ComparisonOperator]func(string, *Value) bson.M{
+var comparisonOperatorToBson = map[ComparisonOperator]func(field string, value *Value) bson.M{
 	ComparisonOperatorEqual: func(field string, value *Value) bson.M {
 		return bson.M{
 			field: bson.M{
@@ -41,6 +42,15 @@ var comparisonOperatorToBson = map[ComparisonOperator]func(string, *Value) bson.
 		return bson.M{
 			field: bson.M{
 				"$lte": value.Primitive(),
+			},
+		}
+	},
+	ComparisonOperatorLike: func(field string, value *Value) bson.M {
+		regex := strings.ToLower(fmt.Sprintf(".*%s.*", value.Primitive()))
+		return bson.M{
+			field: bson.M{
+				"$regex":   regex,
+				"$options": "i",
 			},
 		}
 	},

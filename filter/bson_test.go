@@ -15,6 +15,7 @@ func TestFilterExpression_ToBson(t *testing.T) {
 				filter.NewFilter("c", filter.ComparisonOperatorEqual, filter.Int(100)),
 			),
 			filter.NewFilter("b", filter.ComparisonOperatorEqual, filter.String("2")),
+			filter.NewFilter("d", filter.ComparisonOperatorLike, filter.String("HeLlO")),
 		),
 		filter.NewFilter("a", filter.ComparisonOperatorGreaterOrEqual, filter.Int(1)),
 	)
@@ -34,8 +35,12 @@ func TestFilterExpression_ToBson(t *testing.T) {
 				"b": bson.M{
 					"$eq": "2",
 				},
-			},
-			},
+			}, {
+				"d": bson.M{
+					"$regex":   ".*hello.*",
+					"$options": "i",
+				},
+			}},
 		}, {
 			"a": bson.M{
 				"$gte": int64(1),

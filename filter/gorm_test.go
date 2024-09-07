@@ -44,6 +44,7 @@ func TestFilterExpression_ToGorm(t *testing.T) {
 				filter.NewFilter("c", filter.ComparisonOperatorEqual, filter.Int(100)),
 			),
 			filter.NewFilter("b", filter.ComparisonOperatorEqual, filter.String("2")),
+			filter.NewFilter("d", filter.ComparisonOperatorLike, filter.String("HeLlO")),
 		),
 		filter.NewFilter("a", filter.ComparisonOperatorGreaterOrEqual, filter.Int(1)),
 	)
@@ -56,6 +57,6 @@ func TestFilterExpression_ToGorm(t *testing.T) {
 	}}
 	stmt := buildStmt(clauses)
 
-	assert.Equal(t, "SELECT * FROM `users` WHERE (`c` <> ? OR `b` = ?) AND `a` >= ?", stmt.SQL.String())
-	assert.Equal(t, []any{int64(100), "2", int64(1)}, stmt.Vars)
+	assert.Equal(t, "SELECT * FROM `users` WHERE (`c` <> ? OR `b` = ? OR `LOWER(d)` LIKE ?) AND `a` >= ?", stmt.SQL.String())
+	assert.Equal(t, []any{int64(100), "2", "%hello%", int64(1)}, stmt.Vars)
 }

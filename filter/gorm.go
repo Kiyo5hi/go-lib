@@ -2,6 +2,7 @@ package filter
 
 import (
 	"fmt"
+	"strings"
 
 	"gorm.io/gorm/clause"
 )
@@ -14,7 +15,7 @@ var logicalOperatorToGorm = map[LogicalOperator]func(...clause.Expression) claus
 	LogicalOperatorNot: clause.Not,
 }
 
-var comparisonOperatorToGorm = map[ComparisonOperator]func(string, *Value) clause.Expression{
+var comparisonOperatorToGorm = map[ComparisonOperator]func(field string, value *Value) clause.Expression{
 	ComparisonOperatorEqual: func(field string, value *Value) clause.Expression {
 		return &clause.Eq{Column: field, Value: value.Primitive()}
 	},
@@ -29,6 +30,12 @@ var comparisonOperatorToGorm = map[ComparisonOperator]func(string, *Value) claus
 	},
 	ComparisonOperatorLessOrEqual: func(field string, value *Value) clause.Expression {
 		return &clause.Lte{Column: field, Value: value.Primitive()}
+	},
+	ComparisonOperatorLike: func(field string, value *Value) clause.Expression {
+		return &clause.Like{
+			Column: fmt.Sprintf("LOWER(%s)", field),
+			Value:  strings.ToLower(fmt.Sprintf("%%%s%%", value.Primitive())),
+		}
 	},
 }
 
