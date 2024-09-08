@@ -1,14 +1,16 @@
 package logger
 
 type options struct {
-	debug bool
+	debug   bool
+	appName string
 }
 
 type option func(*options)
 
 func Options(opts ...option) *options {
 	defaultOptions := &options{
-		debug: false,
+		debug:   false,
+		appName: "app",
 	}
 	for _, opt := range opts {
 		opt(defaultOptions)
@@ -19,5 +21,11 @@ func Options(opts ...option) *options {
 func WithDebug(debug bool) option {
 	return func(opts *options) {
 		opts.debug = debug
+	}
+}
+
+func WithAppName(appName string) option {
+	return func(opts *options) {
+		opts.appName = appName
 	}
 }
