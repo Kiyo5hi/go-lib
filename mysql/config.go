@@ -8,13 +8,13 @@ import (
 )
 
 type Config struct {
+	options  map[string]string
 	Username string
 	Password string
 	Protocol string
 	Host     string
-	Port     uint16
 	Database string
-	options  map[string]string
+	Port     uint16
 }
 
 type Option func(c *Config) error

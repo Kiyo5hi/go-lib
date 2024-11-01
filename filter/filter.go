@@ -19,9 +19,9 @@ const (
 )
 
 type Filter struct {
+	Value      *Value             `parser:"@@"`
 	Identifier string             `parser:"@Ident"`
 	Operator   ComparisonOperator `parser:"@( '=' | '>''=' | '<''=' | '>' | '<' | '~' )"`
-	Value      *Value             `parser:"@@"`
 }
 
 type ComparisonOperator string
