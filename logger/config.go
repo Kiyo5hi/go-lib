@@ -1,8 +1,8 @@
 package logger
 
 type options struct {
-	debug   bool
 	appName string
+	debug   bool
 }
 
 type option func(*options)

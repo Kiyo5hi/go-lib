@@ -7,11 +7,11 @@ import (
 )
 
 type Config struct {
+	Options  *options.ClientOptions
 	Host     string
 	Username string
 	Password string
 	Database string
-	Options  *options.ClientOptions
 }
 
 type Option func(c *Config) error
