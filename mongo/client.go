@@ -17,7 +17,7 @@ func NewClient(ctx context.Context, conf *Config) (*Client, error) {
 	srv := conf.Srv()
 	opts := conf.Options
 	if opts == nil {
-		options.Client()
+		opts = options.Client()
 	}
 	opts.ApplyURI(srv)
 	client, err := mongo.Connect(ctx, opts)

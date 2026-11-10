@@ -19,9 +19,10 @@ const (
 )
 
 type Filter struct {
-	Value      *Value             `parser:"@@"`
+	// Participle reads fields in declaration order; this is grammar, not packing.
 	Identifier string             `parser:"@Ident"`
 	Operator   ComparisonOperator `parser:"@( '=' | '>''=' | '<''=' | '>' | '<' | '~' )"`
+	Value      *Value             `parser:"@@"`
 }
 
 type ComparisonOperator string
